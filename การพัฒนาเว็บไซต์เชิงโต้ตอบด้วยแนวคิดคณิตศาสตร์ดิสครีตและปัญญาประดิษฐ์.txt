@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Sweet Bakery</title>
+
+<style>
+
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, "Tahoma", sans-serif;
+    background: #f5f3ef;
+    color: #3d342d;
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+header {
+    background: linear-gradient(135deg, #211d19, #4b3528);
+    color: white;
+    padding: 18px 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.25);
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: bold;
+    color: #ffd84d;
+}
+
+nav button {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+nav button:hover {
+    color: #ffd84d;
+}
+
+/* =====================================================
+   PAGE
+===================================================== */
+
+.page {
+    display: none;
+    min-height: 650px;
+}
+
+.page.active {
+    display: block;
+}
+
+/* =====================================================
+   HOME
+===================================================== */
+
+.hero {
+    min-height: 480px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    background:
+        radial-gradient(
+            circle at 20% 20%,
+            #fff1b8 0 8%,
+            transparent 9%
+        ),
+        radial-gradient(
+            circle at 80% 70%,
+            #ead8c7 0 10%,
+            transparent 11%
+        ),
+        #fffdf9;
+}
+
+.hero h1 {
+    font-size: 55px;
+    color: #4b3528;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 20px;
+    margin-bottom: 30px;
+    color: #5a514a;
+}
+
+.btn {
+    display: inline-block;
+    padding: 13px 25px;
+    border-radius: 30px;
+    background: #d6a928;
+    color: #211d19;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.btn:hover {
+    background: #b98d12;
+    color: white;
+}
+
+section {
+    padding: 55px 8%;
+}
+
+.title {
+    text-align: center;
+    color: #4b3528;
+    margin-bottom: 30px;
+}
+
+/* =====================================================
+   FEATURES
+===================================================== */
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.feature {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(70,55,45,0.15);
+    border: 1px solid #ded8d1;
+}
+
+.feature .icon {
+    font-size: 45px;
+    margin-bottom: 15px;
+}
+
+.feature h3 {
+    color: #4b3528;
+    margin-bottom: 10px;
+}
+
+/* =====================================================
+   AI RECOMMENDATION
+===================================================== */
+
+.ai-box {
+    max-width: 800px;
+    margin: auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(70,55,45,0.15);
+    text-align: center;
+    border: 1px solid #ded8d1;
+}
+
+select {
+    padding: 12px;
+    border: 2px solid #d7c5b5;
+    border-radius: 10px;
+    margin: 10px;
+    font-size: 16px;
+    background: #fffdf9;
+    color: #3d342d;
+}
+
+#recommendation {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f5eadf;
+    border-radius: 15px;
+    min-height: 60px;
+}
+
+/* =====================================================
+   PRODUCTS
+===================================================== */
+
+.products-container {
+    padding: 45px 8%;
+}
+
+.products-container h1 {
+    text-align: center;
+    color: #4b3528;
+    margin-bottom: 15px;
+}
+
+.subtitle {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #625950;
+}
+
+/* =====================================================
+   FILTER
+===================================================== */
+
+.filter {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(70,55,45,0.15);
+    text-align: center;
+    border: 1px solid #ded8d1;
+}
+
+.filter strong {
+    color: #4b3528;
+}
+
+.filter button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 20px;
+    margin: 5px;
+    background: #e5ded7;
+    color: #3d342d;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.filter button:hover {
+    background: #d6a928;
+    color: #211d19;
+}
+
+/* =====================================================
+   PRODUCT GRID
+===================================================== */
+
+.products {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(70,55,45,0.15);
+    text-align: center;
+    padding-bottom: 20px;
+    border: 1px solid #ded8d1;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(70,55,45,0.22);
+}
+
+.cake {
+    font-size: 80px;
+    padding: 25px;
+    background: #f5eadf;
+}
+
+.card h3 {
+    margin: 15px 0 5px;
+    color: #3d342d;
+}
+
+.price {
+    color: #9a7212;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.add {
+    padding: 10px 20px;
+    background: #3d342d;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.add:hover {
+    background: #d6a928;
+    color: #211d19;
+}
+
+/* =====================================================
+   MATHEMATICS
+===================================================== */
+
+.math-box {
+    margin-top: 40px;
+    background: #eee8e1;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    border: 1px solid #d4cbc2;
+}
+
+.math-box h2 {
+    color: #4b3528;
+}
+
+.math-box input {
+    width: 70px;
+    padding: 10px;
+    margin: 10px;
+    border: 2px solid #cbb9a8;
+    border-radius: 8px;
+    background: white;
+    color: #3d342d;
+}
+
+#combinationResult {
+    margin-top: 15px;
+    font-size: 18px;
+    color: #795548;
+    font-weight: bold;
+}
+
+/* =====================================================
+   CART
+===================================================== */
+
+.cart-container {
+    padding: 45px 8%;
+    min-height: 650px;
+}
+
+.cart-container h1 {
+    color: #4b3528;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.cart {
+    max-width: 850px;
+    margin: auto;
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(70,55,45,0.15);
+    border: 1px solid #ded8d1;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px;
+    border-bottom: 1px solid #e2ddd7;
+    gap: 10px;
+}
+
+.item-name {
+    font-weight: bold;
+    color: #3d342d;
+}
+
+.item-price {
+    color: #9a7212;
+    font-weight: bold;
+}
+
+.delete {
+    background: #5a5049;
+    color: white;
+    border: none;
+    padding: 8px 13px;
+    border-radius: 15px;
+    cursor: pointer;
+}
+
+.delete:hover {
+    background: #211d19;
+}
+
+.total {
+    text-align: right;
+    padding: 25px 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #4b3528;
+}
+
+.checkout {
+    text-align: center;
+}
+
+.checkout button {
+    padding: 14px 30px;
+    background: #d6a928;
+    color: #211d19;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.checkout button:hover {
+    background: #b98d12;
+    color: white;
+}
+
+.empty {
+    text-align: center;
+    padding: 50px;
+    color: #777;
+}
+
+/* =====================================================
+   AI CART ANALYSIS
+===================================================== */
+
+.ai-message {
+    max-width: 850px;
+    margin: 30px auto;
+    background: #f5eadf;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    border: 1px solid #ded0c2;
+}
+
+.ai-message h2 {
+    color: #4b3528;
+}
+
+/* =====================================================
+   DEVELOPER PAGE
+===================================================== */
+
+.developer-section {
+    min-height: 650px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 8%;
+}
+
+.developer-card {
+    max-width: 650px;
+    width: 100%;
+    background: #ffffff;
+    padding: 45px;
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(70,55,45,0.18);
+    border: 1px solid #ded8d1;
+}
+
+.developer-icon {
+    font-size: 90px;
+    margin-bottom: 20px;
+}
+
+.developer-card h1 {
+    color: #4b3528;
+    margin-bottom: 20px;
+}
+
+.developer-card .name {
+    font-size: 28px;
+    font-weight: bold;
+    color: #3d342d;
+    margin-bottom: 15px;
+}
+
+.student-id {
+    font-size: 20px;
+    color: #9a7212;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+.developer-description {
+    color: #625950;
+    font-size: 17px;
+    line-height: 1.8;
+    margin-bottom: 25px;
+}
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer {
+    background: #211d19;
+    color: white;
+    text-align: center;
+    padding: 25px;
+}
+
+footer p {
+    color: #e5ded7;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width: 900px) {
+
+    .products {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media(max-width: 600px) {
+
+    header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    nav {
+        text-align: center;
+    }
+
+    nav button {
+        margin: 5px;
+    }
+
+    .products {
+        grid-template-columns: 1fr;
+    }
+
+    .hero h1 {
+        font-size: 40px;
+    }
+
+    .hero p {
+        font-size: 17px;
+        padding: 0 20px;
+    }
+
+    .item {
+        flex-wrap: wrap;
+    }
+
+    .developer-card {
+        padding: 30px 20px;
+    }
+
+    .developer-card .name {
+        font-size: 24px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header>
+
+    <div class="logo">
+        🍰 Sweet AI
+    </div>
+
+    <nav>
+
+        <button onclick="showPage('home')">
+            🏠 หน้าแรก
+        </button>
+
+        <button onclick="showPage('products')">
+            🍪 สินค้า
+        </button>
+
+        <button onclick="showPage('cart')">
+            🛒 ตะกร้า
+            (<span id="cartCount">0</span>)
+        </button>
+
+        <button onclick="showPage('developer')">
+            👨‍💻 ผู้พัฒนา
+        </button>
+
+    </nav>
+
+</header>
+
+
+<!-- =====================================================
+     PAGE 1 : HOME
+===================================================== -->
+
+<div id="home" class="page active">
+
+    <div class="hero">
+
+        <div>
+
+            <h1>
+                Sweet AI 🍰
+            </h1>
+
+            <p>
+                ร้านขนมออนไลน์ที่ผสาน
+                <b>คณิตศาสตร์ดิสครีต</b>
+                และ
+                <b>ปัญญาประดิษฐ์</b>
+            </p>
+
+            <button
+                class="btn"
+                onclick="showPage('products')">
+
+                🍪 เลือกซื้อขนม
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <section>
+
+        <h2 class="title">
+            เทคโนโลยีภายในร้าน
+        </h2>
+
+        <div class="features">
+
+            <div class="feature">
+
+                <div class="icon">
+                    🔢
+                </div>
+
+                <h3>
+                    คณิตศาสตร์ดิสครีต
+                </h3>
+
+                <p>
+                    ใช้หลัก Combinatorics
+                    คำนวณจำนวนชุดขนม
+                    ที่สามารถจัดได้
+                </p>
+
+            </div>
+
+
+            <div class="feature">
+
+                <div class="icon">
+                    🤖
+                </div>
+
+                <h3>
+                    AI Recommendation
+                </h3>
+
+                <p>
+                    วิเคราะห์ความชอบของลูกค้า
+                    เพื่อแนะนำขนมที่เหมาะสม
+                </p>
+
+            </div>
+
+
+            <div class="feature">
+
+                <div class="icon">
+                    🧠
+                </div>
+
+                <h3>
+                    Boolean Logic
+                </h3>
+
+                <p>
+                    ใช้แนวคิด AND / OR
+                    ในการกรองสินค้า
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section>
+
+        <h2 class="title">
+            🤖 AI ช่วยเลือกขนม
+        </h2>
+
+        <div class="ai-box">
+
+            <p>
+                บอกความชอบของคุณ
+                แล้ว AI จะช่วยแนะนำขนม
+            </p>
+
+            <select id="taste">
+
+                <option value="sweet">
+                    ชอบหวาน 🍬
+                </option>
+
+                <option value="chocolate">
+                    ชอบช็อกโกแลต 🍫
+                </option>
+
+                <option value="fruit">
+                    ชอบผลไม้ 🍓
+                </option>
+
+                <option value="light">
+                    ชอบรสเบา ๆ 🌸
+                </option>
+
+            </select>
+
+            <button
+                class="btn"
+                onclick="recommend()">
+
+                ให้ AI แนะนำ
+
+            </button>
+
+            <div id="recommendation">
+
+                ผลการแนะนำจะแสดงตรงนี้
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- =====================================================
+     PAGE 2 : PRODUCTS
+===================================================== -->
+
+<div id="products" class="page">
+
+    <div class="products-container">
+
+        <h1>
+            🍪 รายการขนม
+        </h1>
+
+        <p class="subtitle">
+            เลือกขนมที่คุณชื่นชอบ
+            และเพิ่มลงตะกร้า
+        </p>
+
+
+        <!-- FILTER -->
+
+        <div class="filter">
+
+            <strong>
+                กรองสินค้า:
+            </strong>
+
+            <button onclick="filterProducts('all')">
+                ทั้งหมด
+            </button>
+
+            <button onclick="filterProducts('cake')">
+                เค้ก
+            </button>
+
+            <button onclick="filterProducts('chocolate')">
+                ช็อกโกแลต
+            </button>
+
+            <button onclick="filterProducts('fruit')">
+                ผลไม้
+            </button>
+
+        </div>
+
+
+        <!-- PRODUCT LIST -->
+
+        <div class="products">
+
+            <div class="card" data-type="cake">
+
+                <div class="cake">
+                    🍰
+                </div>
+
+                <h3>
+                    Strawberry Cake
+                </h3>
+
+                <p class="price">
+                    ฿120
+                </p>
+
+                <button
+                    class="add"
+                    onclick="addToCart('Strawberry Cake',120)">
+
+                    เพิ่มลงตะกร้า
+
+                </button>
+
+            </div>
+
+
+            <div class="card" data-type="chocolate">
+
+                <div class="cake">
+                    🍫
+                </div>
+
+                <h3>
+                    Chocolate Brownie
+                </h3>
+
+                <p class="price">
+                    ฿90
+                </p>
+
+                <button
+                    class="add"
+                    onclick="addToCart('Chocolate Brownie',90)">
+
+                    เพิ่มลงตะกร้า
+
+                </button>
+
+            </div>
+
+
+            <div class="card" data-type="cake">
+
+                <div class="cake">
+                    🧁
+                </div>
+
+                <h3>
+                    Vanilla Cupcake
+                </h3>
+
+                <p class="price">
+                    ฿60
+                </p>
+
+                <button
+                    class="add"
+                    onclick="addToCart('Vanilla Cupcake',60)">
+
+                    เพิ่มลงตะกร้า
+
+                </button>
+
+            </div>
+
+
+            <div class="card" data-type="fruit">
+
+                <div class="cake">
+                    🍓
+                </div>
+
+                <h3>
+                    Strawberry Tart
+                </h3>
+
+                <p class="price">
+                    ฿100
+                </p>
+
+                <button
+                    class="add"
+                    onclick="addToCart('Strawberry Tart',100)">
+
+                    เพิ่มลงตะกร้า
+
+                </button>
+
+            </div>
+
+
+            <div class="card" data-type="chocolate">
+
+                <div class="cake">
+                    🍪
+                </div>
+
+                <h3>
+                    Chocolate Cookie
+                </h3>
+
+                <p class="price">
+                    ฿50
+                </p>
+
+                <button
+                    class="add"
+                    onclick="addToCart('Chocolate Cookie',50)">
+
+                    เพิ่มลงตะกร้า
+
+                </button>
+
+            </div>
+
+
+            <div class="card" data-type="fruit">
+
+                <div class="cake">
+                    🍋
+                </div>
+
+                <h3>
+                    Lemon Cake
+                </h3>
+
+                <p class="price">
+                    ฿80
+                </p>
+
+                <button
+                    class="add"
+                    onclick="addToCart('Lemon Cake',80)">
+
+                    เพิ่มลงตะกร้า
+
+                </button>
+
+            </div>
+
+
+            <div class="card" data-type="cake">
+
+                <div class="cake">
+                    🍩
+                </div>
+
+                <h3>
+                    Pink Donut
+                </h3>
+
+                <p class="price">
+                    ฿45
+                </p>
+
+                <button
+                    class="add"
+                    onclick="addToCart('Pink Donut',45)">
+
+                    เพิ่มลงตะกร้า
+
+                </button>
+
+            </div>
+
+
+            <div class="card" data-type="chocolate">
+
+                <div class="cake">
+                    🍮
+                </div>
+
+                <h3>
+                    Chocolate Pudding
+                </h3>
+
+                <p class="price">
+                    ฿70
+                </p>
+
+                <button
+                    class="add"
+                    onclick="addToCart('Chocolate Pudding',70)">
+
+                    เพิ่มลงตะกร้า
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             MATHEMATICS
+        ================================================== -->
+
+        <div class="math-box">
+
+            <h2>
+                🔢 คณิตศาสตร์ดิสครีต:
+                Combinations
+            </h2>
+
+            <br>
+
+            <p>
+                ต้องการจัดชุดขนมจากสินค้าทั้งหมด
+                โดยเลือกขนมไม่ซ้ำกัน
+            </p>
+
+            <br>
+
+            <p>
+                <b>
+                    C(n,r) = n! / (r!(n-r)!)
+                </b>
+            </p>
+
+            <br>
+
+            <label>
+
+                จำนวนขนมทั้งหมด (n):
+
+                <input
+                    type="number"
+                    id="n"
+                    value="8"
+                    min="1">
+
+            </label>
+
+
+            <label>
+
+                จำนวนที่เลือก (r):
+
+                <input
+                    type="number"
+                    id="r"
+                    value="3"
+                    min="0">
+
+            </label>
+
+            <br>
+
+            <button
+                class="add"
+                onclick="calculateCombination()">
+
+                🧮 คำนวณ
+
+            </button>
+
+            <div id="combinationResult"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PAGE 3 : CART
+===================================================== -->
+
+<div id="cart" class="page">
+
+    <div class="cart-container">
+
+        <h1>
+            🛒 ตะกร้าสินค้า
+        </h1>
+
+        <div class="cart">
+
+            <div id="cartItems"></div>
+
+            <div class="total">
+
+                รวมทั้งหมด:
+
+                <span id="total">
+                    ฿0
+                </span>
+
+            </div>
+
+            <div class="checkout">
+
+                <button onclick="checkout()">
+
+                    💳 สั่งซื้อสินค้า
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- AI ANALYSIS -->
+
+        <div class="ai-message">
+
+            <h2>
+                🤖 AI วิเคราะห์ตะกร้า
+            </h2>
+
+            <br>
+
+            <p id="aiAnalysis">
+                กำลังวิเคราะห์...
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PAGE 4 : DEVELOPER
+===================================================== -->
+
+<div id="developer" class="page">
+
+    <div class="developer-section">
+
+        <div class="developer-card">
+
+            <div class="developer-icon">
+                👨‍💻
+            </div>
+
+            <h1>
+                👨‍💻 ผู้พัฒนาเว็บไซต์
+            </h1>
+
+            <div class="name">
+                ดนุวัศ พระบาลี
+            </div>
+
+            <div class="student-id">
+                รหัสนักศึกษา : 69122202069
+            </div>
+
+            <p class="developer-description">
+                ผู้พัฒนาเว็บไซต์ Sweet AI Online Bakery
+                <br>
+                เว็บไซต์ร้านขนมออนไลน์ที่ผสาน
+                คณิตศาสตร์ดิสครีตและปัญญาประดิษฐ์
+            </p>
+
+            <button
+                class="btn"
+                onclick="showPage('home')">
+
+                🏠 กลับหน้าแรก
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+    <p>
+        © 2026 Sweet AI Online Bakery
+        | เว็บไซต์ขายขนมออนไลน์
+    </p>
+
+</footer>
+
+
+<script>
+
+/* =====================================================
+   PAGE NAVIGATION
+===================================================== */
+
+function showPage(pageName) {
+
+    const pages =
+        document.querySelectorAll(".page");
+
+    pages.forEach(page => {
+        page.classList.remove("active");
+    });
+
+    document
+        .getElementById(pageName)
+        .classList.add("active");
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+    if (pageName === "cart") {
+        displayCart();
+    }
+
+}
+
+
+/* =====================================================
+   AI RECOMMENDATION
+===================================================== */
+
+function recommend() {
+
+    const taste =
+        document.getElementById("taste").value;
+
+    let result = "";
+
+    if (taste === "sweet") {
+
+        result =
+            "🍰 AI แนะนำ: Strawberry Cake " +
+            "เพราะมีรสหวานและครีมเข้มข้น";
+
+    }
+
+    else if (taste === "chocolate") {
+
+        result =
+            "🍫 AI แนะนำ: Chocolate Brownie " +
+            "เพราะเหมาะกับคนรักช็อกโกแลต";
+
+    }
+
+    else if (taste === "fruit") {
+
+        result =
+            "🍓 AI แนะนำ: Strawberry Tart " +
+            "เพราะมีรสชาติจากผลไม้";
+
+    }
+
+    else {
+
+        result =
+            "🧁 AI แนะนำ: Vanilla Cupcake " +
+            "เพราะมีรสชาติอ่อนและรับประทานง่าย";
+
+    }
+
+    document
+        .getElementById("recommendation")
+        .innerHTML = result;
+
+}
+
+
+/* =====================================================
+   SHOPPING CART
+===================================================== */
+
+let cart =
+    JSON.parse(
+        localStorage.getItem("sweetAIcart")
+    ) || [];
+
+
+function addToCart(name, price) {
+
+    cart.push({
+        name: name,
+        price: price
+    });
+
+    saveCart();
+
+    updateCartCount();
+
+    alert(
+        "🍰 เพิ่ม " +
+        name +
+        " ลงตะกร้าแล้ว!"
+    );
+
+}
+
+
+/* =====================================================
+   SAVE CART
+===================================================== */
+
+function saveCart() {
+
+    localStorage.setItem(
+        "sweetAIcart",
+        JSON.stringify(cart)
+    );
+
+}
+
+
+/* =====================================================
+   CART COUNT
+===================================================== */
+
+function updateCartCount() {
+
+    document
+        .getElementById("cartCount")
+        .innerText = cart.length;
+
+}
+
+
+/* =====================================================
+   DISPLAY CART
+===================================================== */
+
+function displayCart() {
+
+    const container =
+        document.getElementById("cartItems");
+
+    if (cart.length === 0) {
+
+        container.innerHTML = `
+
+            <div class="empty">
+
+                <h2>
+                    ตะกร้ายังว่าง 🍪
+                </h2>
+
+                <br>
+
+                <p>
+                    ลองเลือกขนมที่คุณชื่นชอบก่อน
+                </p>
+
+            </div>
+
+        `;
+
+        document
+            .getElementById("total")
+            .innerText = "฿0";
+
+        analyzeCart();
+
+        return;
+    }
+
+
+    let html = "";
+    let total = 0;
+
+
+    cart.forEach((item, index) => {
+
+        total += item.price;
+
+        html += `
+
+            <div class="item">
+
+                <span class="item-name">
+
+                    ${index + 1}.
+                    ${item.name}
+
+                </span>
+
+                <span class="item-price">
+
+                    ฿${item.price}
+
+                </span>
+
+                <button
+                    class="delete"
+                    onclick="removeItem(${index})">
+
+                    ลบ
+
+                </button>
+
+            </div>
+
+        `;
+
+    });
+
+
+    container.innerHTML = html;
+
+
+    document
+        .getElementById("total")
+        .innerText = "฿" + total;
+
+
+    analyzeCart();
+
+}
+
+
+/* =====================================================
+   REMOVE ITEM
+===================================================== */
+
+function removeItem(index) {
+
+    cart.splice(index, 1);
+
+    saveCart();
+
+    updateCartCount();
+
+    displayCart();
+
+}
+
+
+/* =====================================================
+   CHECKOUT
+===================================================== */
+
+function checkout() {
+
+    if (cart.length === 0) {
+
+        alert(
+            "⚠️ กรุณาเลือกขนมก่อนสั่งซื้อ"
+        );
+
+        return;
+    }
+
+
+    let total = cart.reduce(
+        (sum, item) =>
+            sum + item.price,
+        0
+    );
+
+
+    alert(
+
+        "🎉 สั่งซื้อสำเร็จ!\n\n" +
+
+        "จำนวนสินค้า: " +
+        cart.length +
+        " รายการ\n" +
+
+        "ยอดรวม: ฿" +
+        total +
+        "\n\n" +
+
+        "ขอบคุณที่ใช้บริการ Sweet AI 🍰"
+
+    );
+
+
+    cart = [];
+
+    localStorage.removeItem(
+        "sweetAIcart"
+    );
+
+    updateCartCount();
+
+    displayCart();
+
+}
+
+
+/* =====================================================
+   AI CART ANALYSIS
+===================================================== */
+
+function analyzeCart() {
+
+    const result =
+        document.getElementById("aiAnalysis");
+
+
+    if (cart.length === 0) {
+
+        result.innerHTML =
+
+            "🤖 AI แนะนำให้ลองเลือก " +
+            "Chocolate Brownie หรือ " +
+            "Strawberry Cake 🍰";
+
+        return;
+
+    }
+
+
+    const chocolate =
+
+        cart.filter(
+            item =>
+                item.name
+                .toLowerCase()
+                .includes("chocolate")
+        ).length;
+
+
+    if (chocolate >= 2) {
+
+        result.innerHTML =
+
+            "🤖 AI วิเคราะห์แล้วพบว่า " +
+            "คุณชอบช็อกโกแลต! " +
+            "แนะนำ Chocolate Cookie 🍪";
+
+    }
+
+    else if (cart.length >= 3) {
+
+        result.innerHTML =
+
+            "🤖 คุณเลือกขนมหลายชนิดแล้ว! " +
+            "AI แนะนำให้จัดเป็นชุดของขวัญ 🎁";
+
+    }
+
+    else {
+
+        result.innerHTML =
+
+            "🤖 AI แนะนำ Strawberry Tart " +
+            "เพื่อเพิ่มรสชาติผลไม้ 🍓";
+
+    }
+
+}
+
+
+/* =====================================================
+   PRODUCT FILTER
+===================================================== */
+
+function filterProducts(type) {
+
+    const cards =
+        document.querySelectorAll(".card");
+
+
+    cards.forEach(card => {
+
+        if (
+            type === "all" ||
+            card.dataset.type === type
+        ) {
+
+            card.style.display = "block";
+
+        }
+
+        else {
+
+            card.style.display = "none";
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   FACTORIAL
+===================================================== */
+
+function factorial(num) {
+
+    let result = 1;
+
+    for (
+        let i = 2;
+        i <= num;
+        i++
+    ) {
+
+        result *= i;
+
+    }
+
+    return result;
+
+}
+
+
+/* =====================================================
+   COMBINATION
+===================================================== */
+
+function calculateCombination() {
+
+    const n =
+        parseInt(
+            document.getElementById("n").value
+        );
+
+    const r =
+        parseInt(
+            document.getElementById("r").value
+        );
+
+
+    const resultBox =
+        document.getElementById(
+            "combinationResult"
+        );
+
+
+    if (
+        isNaN(n) ||
+        isNaN(r) ||
+        r > n ||
+        r < 0 ||
+        n < 0
+    ) {
+
+        resultBox.innerHTML =
+
+            "⚠️ กรุณากรอกค่าให้ถูกต้อง " +
+            "โดย r ต้องไม่มากกว่า n";
+
+        return;
+
+    }
+
+
+    const result =
+
+        factorial(n) /
+        (
+            factorial(r) *
+            factorial(n - r)
+        );
+
+
+    resultBox.innerHTML =
+
+        `🎯 C(${n}, ${r}) = ${result} ชุด`;
+
+}
+
+
+/* =====================================================
+   START WEBSITE
+===================================================== */
+
+updateCartCount();
+
+displayCart();
+
+</script>
+
+</body>
+</html>
