@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Realistic Map Navigation - Extended Shortcuts</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Kanit', 'Segoe UI', Tahoma, sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+        }
+
+        body.theme-night {
+            background-color: #0b0f19;
+            color: #f1f5f9;
+        }
+        body.theme-night .container {
+            background: #111827;
+            border-color: #1f2937;
+        }
+        body.theme-night header h1 { color: #38bdf8; }
+        body.theme-night .map-section {
+            background: #030712;
+            border-color: #1f2937;
+        }
+        body.theme-night .control-panel,
+        body.theme-night .stat-card {
+            background: #1f2937;
+        }
+        body.theme-night input[type="text"], 
+        body.theme-night select {
+            background: #374151;
+            color: #fff;
+            border-color: #4b5563;
+        }
+        body.theme-night .suggestions-list {
+            background: #1f2937;
+            border-color: #374151;
+        }
+        body.theme-night .suggestions-list div:hover {
+            background: #0284c7;
+            color: #fff;
+        }
+        body.theme-night .route-details-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+        }
+        body.theme-night .step-item {
+            background: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+        }
+        body.theme-night .step-item.start { border-color: #10b981; color: #34d399; }
+        body.theme-night .step-item.end { border-color: #ef4444; color: #f87171; }
+
+        body.theme-day {
+            background-color: #fef3c7;
+            color: #451a03;
+        }
+        body.theme-day .container {
+            background: #fffbeb;
+            border-color: #fde68a;
+        }
+        body.theme-day header h1 { color: #d97706; }
+        body.theme-day .map-section {
+            background: #fef08a;
+            border-color: #fcd34d;
+        }
+        body.theme-day .control-panel,
+        body.theme-day .stat-card {
+            background: #fef3c7;
+        }
+        body.theme-day input[type="text"], 
+        body.theme-day select {
+            background: #ffffff;
+            color: #78350f;
+            border-color: #fcd34d;
+        }
+        body.theme-day .suggestions-list {
+            background: #ffffff;
+            border-color: #fcd34d;
+        }
+        body.theme-day .suggestions-list div:hover {
+            background: #f59e0b;
+            color: #fff;
+        }
+        body.theme-day .route-details-card {
+            background: #ffffff;
+            border: 1px solid #fde68a;
+        }
+        body.theme-day .step-item {
+            background: #fffbeb;
+            color: #78350f;
+            border: 1px solid #fde68a;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 1px solid;
+        }
+        header { text-align: center; margin-bottom: 20px; }
+        header h1 { margin: 0; font-size: 32px; letter-spacing: 2px; }
+        
+        .map-section {
+            position: relative;
+            border: 2px solid;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        canvas { display: block; width: 100%; height: auto; }
+        
+        .map-legend {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            color: #fff;
+            font-size: 12px;
+            z-index: 10;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+        .legend-item:last-child { margin-bottom: 0; }
+        .legend-line { width: 25px; height: 3px; }
+        .legend-line.main { background: #64748b; }
+        .legend-line.shortcut { border-top: 3px dashed #f59e0b; }
+        .legend-line.active { background: #38bdf8; }
+
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+        .option-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 12px;
+            flex: 1;
+        }
+        .search-box-wrapper { position: relative; flex: 1; min-width: 180px; }
+        label { display: block; font-size: 13px; color: #9ca3af; margin-bottom: 6px; font-weight: 600; }
+        input[type="text"], select, button {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            outline: none;
+            width: 100%;
+        }
+        .suggestions-list {
+            position: absolute;
+            top: 100%; left: 0; right: 0;
+            border-radius: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            margin-top: 4px;
+        }
+        .suggestions-list div { padding: 8px 12px; cursor: pointer; font-size: 13px; }
+        .btn-group { display: flex; gap: 8px; }
+        button {
+            width: auto;
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+        }
+        body.theme-day button.btn-action {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        button:disabled { background: #9ca3af !important; cursor: not-allowed; transform: none; box-shadow: none !important; }
+        .btn-swap { background: #374151; color: #38bdf8; border: 1px solid #4b5563; padding: 10px; border-radius: 8px; cursor: pointer; }
+        .btn-reset { background: #4b5563 !important; color: #fff !important; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #38bdf8;
+        }
+        .stat-card.cost { border-left-color: #10b981; }
+        .stat-card.time { border-left-color: #ec4899; }
+        .stat-card .lbl { font-size: 12px; }
+        .stat-card .val { font-size: 22px; font-weight: bold; margin-top: 4px; }
+        
+        .route-details-card { margin-top: 20px; padding: 20px; border-radius: 12px; }
+        .route-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed rgba(156, 163, 175, 0.3);
+        }
+        .route-flow-container { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+        .step-item { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+        .placeholder-text { color: #9ca3af; font-size: 14px; text-align: center; padding: 10px 0; }
+    </style>
+</head>
+<body class="theme-night">
+
+<div class="container">
+    <header>
+        <h1>Smart Map Navigation System</h1>
+    </header>
+
+    <div class="map-section">
+        <div class="map-legend">
+            <div class="legend-item"><div class="legend-line main"></div><span>ทางหลวงสายหลัก</span></div>
+            <div class="legend-item"><div class="legend-line shortcut"></div><span>ทางลัด (Shortcut)</span></div>
+            <div class="legend-item"><div class="legend-line active"></div><span>เส้นทางที่เลือก</span></div>
+        </div>
+        <canvas id="mapCanvas" width="1150" height="750"></canvas>
+    </div>
+
+    <div class="control-panel">
+        <div class="option-group">
+            <div class="search-box-wrapper">
+                <label for="startInput">🔍 ที่อยู่ปัจจุบัน (ต้นทาง):</label>
+                <input type="text" id="startInput" placeholder="พิมพ์ชื่อจังหวัดต้นทาง..." autocomplete="off" oninput="drawMap()">
+                <div id="startSuggestions" class="suggestions-list"></div>
+            </div>
+
+            <div style="align-self: flex-end;">
+                <button type="button" class="btn-swap" onclick="swapLocations()" title="สลับต้นทาง-ปลายทาง">🔄</button>
+            </div>
+
+            <div class="search-box-wrapper">
+                <label for="endInput">🏁 ตำแหน่งที่จะไป (ปลายทาง):</label>
+                <input type="text" id="endInput" placeholder="พิมพ์ชื่อจังหวัดปลายทาง..." autocomplete="off" oninput="drawMap()">
+                <div id="endSuggestions" class="suggestions-list"></div>
+            </div>
+
+            <div style="min-width: 130px;">
+                <label for="vehicleType">🛵 พาหนะเดินทาง:</label>
+                <select id="vehicleType" onchange="drawMap()">
+                    <option value="🚗">🚗 รถยนต์</option>
+                    <option value="🛵">🛵 มอเตอร์ไซค์</option>
+                </select>
+            </div>
+
+            <div style="min-width: 180px;">
+                <label for="optimizeType">🎯 เงื่อนไขเส้นทาง:</label>
+                <select id="optimizeType">
+                    <option value="shortcut">🛣️ ทางลัด (ระยะทางสั้นที่สุด)</option>
+                    <option value="time">⚡ เส้นทางเร็วที่สุด (ทางหลวงหลัก)</option>
+                    <option value="cost">💰 ประหยัดเงินที่สุด</option>
+                </select>
+            </div>
+
+            <div style="min-width: 140px;">
+                <label for="timeTheme">🌤️ บรรยากาศ:</label>
+                <select id="timeTheme" onchange="updateTheme()">
+                    <option value="auto">⏰ อัตโนมัติ</option>
+                    <option value="day">☀️ ตอนเช้า</option>
+                    <option value="night">🌙 ตอนกลางคืน</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-action" onclick="calculateRoute()">🧭 ค้นหาเส้นทาง</button>
+            <button class="btn-action btn-reset" onclick="resetMap()">🔄 รีเซ็ต</button>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="lbl">ระยะทางรวมทั้งสิ้น</div>
+            <div class="val" id="valDist">0 กม.</div>
+        </div>
+        <div class="stat-card cost">
+            <div class="lbl">ประเมินค่าเดินทาง</div>
+            <div class="val" id="valCost">0 บาท</div>
+        </div>
+        <div class="stat-card time">
+            <div class="lbl">เวลาเดินทางโดยประมาณ</div>
+            <div class="val" id="valTime">0 ชม. 0 นาที</div>
+        </div>
+    </div>
+
+    <div class="route-details-card" id="routeStatus">
+        <div class="placeholder-text">
+            📌 เลือก <b>ต้นทาง, ปลายทาง, รูปแบบการเดินทาง</b> แล้วกดปุ่ม <b>"ค้นหาเส้นทาง"</b>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('mapCanvas');
+const ctx = canvas.getContext('2d');
+let currentThemeMode = 'night';
+
+const nodes = {
+    'เชียงราย': { x: 320, y: 50 }, 'เชียงใหม่': { x: 230, y: 90 }, 'แม่ฮ่องสอน': { x: 150, y: 90 },
+    'พะเยา': { x: 360, y: 100 }, 'น่าน': { x: 420, y: 110 }, 'ลำพูน': { x: 230, y: 130 },
+    'ลำปาง': { x: 290, y: 140 }, 'แพร่': { x: 370, y: 160 }, 'อุตรดิตถ์': { x: 370, y: 210 },
+    'ตาก': { x: 200, y: 230 }, 'สุโขทัย': { x: 300, y: 240 }, 'พิษณุโลก': { x: 370, y: 260 },
+    'กำแพงเพชร': { x: 270, y: 280 }, 'พิจิตร': { x: 340, y: 290 }, 'เพชรบูรณ์': { x: 420, y: 280 },
+    'นครสวรรค์': { x: 310, y: 340 }, 'อุทัยธานี': { x: 260, y: 350 },
+    'ชัยนาท': { x: 290, y: 380 }, 'สิงห์บุรี': { x: 310, y: 400 }, 'ลพบุรี': { x: 360, y: 400 },
+    'อ่างทอง': { x: 310, y: 420 }, 'สระบุรี': { x: 370, y: 430 }, 'พระนครศรีอยุธยา': { x: 330, y: 440 },
+    'สุพรรณบุรี': { x: 270, y: 430 }, 'ปทุมธานี': { x: 330, y: 470 }, 'นนทบุรี': { x: 320, y: 485 },
+    'กรุงเทพมหานคร': { x: 330, y: 500 }, 'นครปฐม': { x: 280, y: 490 }, 'สมุทรปราการ': { x: 360, y: 515 },
+    'สมุทรสาคร': { x: 300, y: 520 }, 'สมุทรสงคราม': { x: 270, y: 535 }, 'นครนายก': { x: 410, y: 450 },
+    'ปราจีนบุรี': { x: 450, y: 460 }, 'สระแก้ว': { x: 530, y: 470 }, 'ฉะเชิงเทรา': { x: 410, y: 490 },
+    'ชลบุรี': { x: 410, y: 530 }, 'ระยอง': { x: 440, y: 570 }, 'จันทบุรี': { x: 500, y: 570 }, 'ตราด': { x: 550, y: 600 },
+    'เลย': { x: 480, y: 230 }, 'หนองบัวลำภู': { x: 540, y: 240 }, 'อุดรธานี': { x: 580, y: 230 },
+    'หนองคาย': { x: 600, y: 190 }, 'บึงกาฬ': { x: 660, y: 180 }, 'สกลนคร': { x: 670, y: 230 },
+    'นครพนม': { x: 730, y: 220 }, 'ขอนแก่น': { x: 560, y: 280 }, 'กาฬสินธุ์': { x: 630, y: 280 },
+    'มุกดาหาร': { x: 720, y: 280 }, 'ชัยภูมิ': { x: 470, y: 320 }, 'มหาสารคาม': { x: 600, y: 320 },
+    'ร้อยเอ็ด': { x: 640, y: 320 }, 'ยโสธร': { x: 690, y: 330 }, 'อำนาจเจริญ': { x: 740, y: 330 },
+    'นครราชสีมา': { x: 470, y: 390 }, 'บุรีรัมย์': { x: 550, y: 400 }, 'สุรินทร์': { x: 610, y: 400 },
+    'ศรีสะเกษ': { x: 670, y: 400 }, 'อุบลราชธานี': { x: 740, y: 390 },
+    'กาญจนบุรี': { x: 210, y: 440 }, 'ราชบุรี': { x: 240, y: 500 }, 'เพชรบุรี': { x: 240, y: 560 },
+    'ประจวบคีรีขันธ์': { x: 230, y: 620 },
+    'ชุมพร': { x: 210, y: 670 }, 'ระนอง': { x: 170, y: 690 }, 'สุราษฎร์ธานี': { x: 200, y: 720 },
+    'พังงา': { x: 160, y: 740 }, 'ภูเก็ต': { x: 150, y: 770 }, 'กระบี่': { x: 190, y: 760 },
+    'นครศรีธรรมราช': { x: 240, y: 740 }, 'ตรัง': { x: 210, y: 780 }, 'พัทลุง': { x: 240, y: 780 },
+    'สงขลา': { x: 260, y: 810 }, 'สตูล': { x: 220, y: 820 }, 'ปัตตานี': { x: 290, y: 830 },
+    'นราธิวาส': { x: 310, y: 850 }, 'ยะลา': { x: 280, y: 860 }
+};
+
+// รายการเส้นทางและทางลัด (Shortcut: true = เส้นทางลัด)
+const graph = [
+    // ภาคเหนือ
+    { from: 'เชียงราย', to: 'พะเยา', dist: 94, cost: 140, speed: 85 },
+    { from: 'เชียงราย', to: 'เชียงใหม่', dist: 180, cost: 310, speed: 75 },
+    { from: 'เชียงใหม่', to: 'แม่ฮ่องสอน', dist: 240, cost: 450, speed: 50 },
+    { from: 'เชียงใหม่', to: 'ลำพูน', dist: 30, cost: 50, speed: 90 },
+    { from: 'ลำพูน', to: 'ลำปาง', dist: 75, cost: 110, speed: 85 },
+    { from: 'พะเยา', to: 'น่าน', dist: 170, cost: 260, speed: 80 },
+    { from: 'พะเยา', to: 'น่าน', dist: 120, cost: 180, speed: 60, shortcut: true }, // [ทางลัด]
+    { from: 'พะเยา', to: 'ลำปาง', dist: 133, cost: 260, speed: 80 },
+    { from: 'ลำปาง', to: 'แพร่', dist: 108, cost: 180, speed: 75 },
+    { from: 'แพร่', to: 'น่าน', dist: 118, cost: 190, speed: 80 },
+    { from: 'แพร่', to: 'อุตรดิตถ์', dist: 74, cost: 220, speed: 85 },
+    { from: 'ลำปาง', to: 'ตาก', dist: 178, cost: 250, speed: 90 },
+    { from: 'ตาก', to: 'สุโขทัย', dist: 78, cost: 120, speed: 85 },
+    { from: 'สุโขทัย', to: 'พิษณุโลก', dist: 60, cost: 90, speed: 80 },
+    { from: 'อุตรดิตถ์', to: 'พิษณุโลก', dist: 110, cost: 280, speed: 90 },
+    { from: 'อุตรดิตถ์', to: 'พิษณุโลก', dist: 88, cost: 160, speed: 65, shortcut: true }, // [ทางลัด]
+    { from: 'ตาก', to: 'กำแพงเพชร', dist: 68, cost: 100, speed: 90 },
+    { from: 'พิษณุโลก', to: 'พิจิตร', dist: 55, cost: 80, speed: 85 },
+    { from: 'พิษณุโลก', to: 'เพชรบูรณ์', dist: 130, cost: 240, speed: 70 },
+    { from: 'กำแพงเพชร', to: 'นครสวรรค์', dist: 117, cost: 170, speed: 95 },
+    { from: 'พิจิตร', to: 'นครสวรรค์', dist: 100, cost: 140, speed: 80 },
+    { from: 'เพชรบูรณ์', to: 'ลพบุรี', dist: 210, cost: 320, speed: 85 },
+    
+    // ภาคกลาง
+    { from: 'นครสวรรค์', to: 'อุทัยธานี', dist: 50, cost: 70, speed: 80 },
+    { from: 'นครสวรรค์', to: 'ชัยนาท', dist: 62, cost: 90, speed: 90 },
+    { from: 'ชัยนาท', to: 'สิงห์บุรี', dist: 52, cost: 80, speed: 90 },
+    { from: 'สิงห์บุรี', to: 'อ่างทอง', dist: 40, cost: 60, speed: 90 },
+    { from: 'อ่างทอง', to: 'พระนครศรีอยุธยา', dist: 32, cost: 50, speed: 90 },
+    { from: 'ชัยนาท', to: 'สุพรรณบุรี', dist: 90, cost: 130, speed: 85 },
+    { from: 'ชัยนาท', to: 'สุพรรณบุรี', dist: 75, cost: 95, speed: 65, shortcut: true }, // [ทางลัด]
+    { from: 'สิงห์บุรี', to: 'ลพบุรี', dist: 33, cost: 50, speed: 80 },
+    { from: 'ลพบุรี', to: 'สระบุรี', dist: 46, cost: 70, speed: 85 },
+    { from: 'พระนครศรีอยุธยา', to: 'ปทุมธานี', dist: 46, cost: 120, speed: 95 },
+    { from: 'พระนครศรีอยุธยา', to: 'ปทุมธานี', dist: 38, cost: 50, speed: 65, shortcut: true }, // [ทางลัด]
+    { from: 'ปทุมธานี', to: 'นนทบุรี', dist: 20, cost: 30, speed: 70 },
+    { from: 'นนทบุรี', to: 'กรุงเทพมหานคร', dist: 15, cost: 25, speed: 60 },
+    { from: 'ปทุมธานี', to: 'นครนายก', dist: 75, cost: 110, speed: 85 },
+    { from: 'กรุงเทพมหานคร', to: 'สมุทรปราการ', dist: 25, cost: 50, speed: 70 },
+    { from: 'กรุงเทพมหานคร', to: 'สมุทรสาคร', dist: 35, cost: 50, speed: 80 },
+    { from: 'สมุทรสาคร', to: 'สมุทรสงคราม', dist: 40, cost: 60, speed: 85 },
+    { from: 'กรุงเทพมหานคร', to: 'นครปฐม', dist: 50, cost: 75, speed: 85 },
+    { from: 'นครปฐม', to: 'สุพรรณบุรี', dist: 90, cost: 130, speed: 85 },
+
+    // ภาคตะวันออก
+    { from: 'นครนายก', to: 'ปราจีนบุรี', dist: 25, cost: 40, speed: 80 },
+    { from: 'ปราจีนบุรี', to: 'สระแก้ว', dist: 95, cost: 140, speed: 85 },
+    { from: 'ฉะเชิงเทรา', to: 'ชลบุรี', dist: 45, cost: 70, speed: 85 },
+    { from: 'กรุงเทพมหานคร', to: 'ฉะเชิงเทรา', dist: 80, cost: 120, speed: 90 },
+    { from: 'ชลบุรี', to: 'ระยอง', dist: 98, cost: 180, speed: 100 },
+    { from: 'ชลบุรี', to: 'ระยอง', dist: 80, cost: 100, speed: 70, shortcut: true }, // [ทางลัด]
+    { from: 'ระยอง', to: 'จันทบุรี', dist: 110, cost: 160, speed: 85 },
+    { from: 'จันทบุรี', to: 'ตราด', dist: 70, cost: 100, speed: 85 },
+
+    // ภาคอีสาน
+    { from: 'พิษณุโลก', to: 'เลย', dist: 200, cost: 350, speed: 65 },
+    { from: 'เพชรบูรณ์', to: 'ชัยภูมิ', dist: 160, cost: 250, speed: 75 },
+    { from: 'เพชรบูรณ์', to: 'ขอนแก่น', dist: 175, cost: 200, speed: 60, shortcut: true }, // [ทางลัด] ข้ามเขาน้ำหนาว
+    { from: 'ลพบุรี', to: 'นครราชสีมา', dist: 190, cost: 290, speed: 80 },
+    { from: 'สระบุรี', to: 'นครราชสีมา', dist: 150, cost: 260, speed: 90 },
+    { from: 'เลย', to: 'หนองบัวลำภู', dist: 92, cost: 130, speed: 80 },
+    { from: 'หนองบัวลำภู', to: 'อุดรธานี', dist: 46, cost: 70, speed: 85 },
+    { from: 'อุดรธานี', to: 'หนองคาย', dist: 51, cost: 80, speed: 90 },
+    { from: 'หนองคาย', to: 'บึงกาฬ', dist: 136, cost: 200, speed: 80 },
+    { from: 'อุดรธานี', to: 'สกลนคร', dist: 160, cost: 230, speed: 85 },
+    { from: 'สกลนคร', to: 'นครพนม', dist: 93, cost: 140, speed: 85 },
+    { from: 'อุดรธานี', to: 'ขอนแก่น', dist: 115, cost: 170, speed: 90 },
+    { from: 'ขอนแก่น', to: 'กาฬสินธุ์', dist: 77, cost: 110, speed: 85 },
+    { from: 'กาฬสินธุ์', to: 'มุกดาหาร', dist: 170, cost: 250, speed: 80 },
+    { from: 'ชัยภูมิ', to: 'ขอนแก่น', dist: 150, cost: 220, speed: 85 },
+    { from: 'ขอนแก่น', to: 'มหาสารคาม', dist: 73, cost: 100, speed: 85 },
+    { from: 'มหาสารคาม', to: 'ร้อยเอ็ด', dist: 44, cost: 65, speed: 85 },
+    { from: 'ร้อยเอ็ด', to: 'ยโสธร', dist: 70, cost: 100, speed: 85 },
+    { from: 'ยโสธร', to: 'อำนาจเจริญ', dist: 55, cost: 80, speed: 80 },
+    { from: 'อำนาจเจริญ', to: 'อุบลราชธานี', dist: 75, cost: 110, speed: 85 },
+    { from: 'นครราชสีมา', to: 'บุรีรัมย์', dist: 130, cost: 190, speed: 90 },
+    { from: 'บุรีรัมย์', to: 'สุรินทร์', dist: 50, cost: 75, speed: 85 },
+    { from: 'สุรินทร์', to: 'ศรีสะเกษ', dist: 105, cost: 150, speed: 85 },
+    { from: 'ศรีสะเกษ', to: 'อุบลราชธานี', dist: 60, cost: 90, speed: 90 },
+
+    // ภาคใต้
+    { from: 'สุพรรณบุรี', to: 'กาญจนบุรี', dist: 90, cost: 130, speed: 80 },
+    { from: 'นครปฐม', to: 'ราชบุรี', dist: 42, cost: 60, speed: 85 },
+    { from: 'ราชบุรี', to: 'เพชรบุรี', dist: 55, cost: 80, speed: 90 },
+    { from: 'เพชรบุรี', to: 'ประจวบคีรีขันธ์', dist: 160, cost: 230, speed: 95 },
+    { from: 'ประจวบคีรีขันธ์', to: 'ชุมพร', dist: 180, cost: 260, speed: 95 },
+    { from: 'ชุมพร', to: 'ระนอง', dist: 120, cost: 180, speed: 75 },
+    { from: 'ชุมพร', to: 'สุราษฎร์ธานี', dist: 190, cost: 280, speed: 90 },
+    { from: 'ระนอง', to: 'พังงา', dist: 220, cost: 320, speed: 70 },
+    { from: 'พังงา', to: 'ภูเก็ต', dist: 85, cost: 130, speed: 80 },
+    { from: 'พังงา', to: 'กระบี่', dist: 80, cost: 120, speed: 80 },
+    { from: 'สุราษฎร์ธานี', to: 'นครศรีธรรมราช', dist: 130, cost: 190, speed: 85 },
+    { from: 'กระบี่', to: 'ตรัง', dist: 130, cost: 180, speed: 80 },
+    { from: 'นครศรีธรรมราช', to: 'พัทลุง', dist: 110, cost: 160, speed: 85 },
+    { from: 'พัทลุง', to: 'สงขลา', dist: 110, cost: 160, speed: 90 },
+    { from: 'ตรัง', to: 'สตูล', dist: 140, cost: 200, speed: 80 },
+    { from: 'สงขลา', to: 'ปัตตานี', dist: 100, cost: 140, speed: 85 },
+    { from: 'ปัตตานี', to: 'นราธิวาส', dist: 90, cost: 130, speed: 80 },
+    { from: 'ปัตตานี', to: 'ยะลา', dist: 40, cost: 60, speed: 80 }
+];
+
+let activePath = [];
+let activeEdges = [];
+let activeVisitedNodes = [];
+let vehiclePosition = null;
+let isAnimating = false;
+let dashOffset = 0;
+
+const provinceNames = Object.keys(nodes).sort((a, b) => a.localeCompare(b, 'th'));
+
+function updateTheme() {
+    const themeChoice = document.getElementById('timeTheme').value;
+    let isDay = (themeChoice === 'auto') ? (new Date().getHours() >= 6 && new Date().getHours() < 18) : (themeChoice === 'day');
+    document.body.className = isDay ? 'theme-day' : 'theme-night';
+    currentThemeMode = isDay ? 'day' : 'night';
+    drawMap();
+}
+
+function setupSearchAutocomplete(inputId, suggestionsId) {
+    const input = document.getElementById(inputId);
+    const suggestionsBox = document.getElementById(suggestionsId);
+
+    input.addEventListener('input', function() {
+        const query = this.value.trim();
+        suggestionsBox.innerHTML = '';
+        if (!query) { suggestionsBox.style.display = 'none'; return; }
+
+        const filtered = provinceNames.filter(p => p.includes(query));
+        if (filtered.length === 0) { suggestionsBox.style.display = 'none'; return; }
+
+        filtered.forEach(prov => {
+            const item = document.createElement('div');
+            item.textContent = prov;
+            item.onclick = function() {
+                input.value = prov;
+                suggestionsBox.style.display = 'none';
+                drawMap();
+            };
+            suggestionsBox.appendChild(item);
+        });
+        suggestionsBox.style.display = 'block';
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !suggestionsBox.contains(e.target)) suggestionsBox.style.display = 'none';
+    });
+}
+
+function swapLocations() {
+    if (isAnimating) return;
+    const s = document.getElementById('startInput');
+    const e = document.getElementById('endInput');
+    const temp = s.value; s.value = e.value; e.value = temp;
+    drawMap();
+}
+
+// อัลกอริทึมค้นหาเส้นทางแบบแม่นยำ Dijkstra
+function dijkstra(startNode, endNode, mode) {
+    let distances = {};
+    let prev = {};
+    let edgeUsed = {};
+    let unvisited = new Set(Object.keys(nodes));
+
+    for (let node in nodes) {
+        distances[node] = Infinity;
+        prev[node] = null;
+    }
+    distances[startNode] = 0;
+
+    while (unvisited.size > 0) {
+        let currNode = null;
+        for (let node of unvisited) {
+            if (currNode === null || distances[node] < distances[currNode]) {
+                currNode = node;
+            }
+        }
+
+        if (currNode === endNode || distances[currNode] === Infinity) break;
+        unvisited.delete(currNode);
+
+        let neighbors = graph.filter(e => e.from === currNode || e.to === currNode);
+        for (let edge of neighbors) {
+            let neighbor = edge.from === currNode ? edge.to : edge.from;
+            if (!unvisited.has(neighbor)) continue;
+
+            let weight = 0;
+            if (mode === 'time') {
+                weight = edge.dist / edge.speed; // ทางหลวงหลักมักจะเร็วกว่า
+            } else if (mode === 'shortcut') {
+                weight = edge.dist; // เลือกเส้นทางสั้นที่สุด (รวมทางลัด)
+            } else if (mode === 'cost') {
+                weight = edge.cost + (edge.dist * 1.2);
+            }
+
+            let alt = distances[currNode] + weight;
+            if (alt < distances[neighbor]) {
+                distances[neighbor] = alt;
+                prev[neighbor] = currNode;
+                edgeUsed[neighbor] = edge;
+            }
+        }
+    }
+
+    let path = [];
+    let pathEdges = [];
+    let curr = endNode;
+    while (curr) {
+        path.unshift(curr);
+        if (prev[curr]) pathEdges.unshift(edgeUsed[curr]);
+        curr = prev[curr];
+    }
+    return { path, pathEdges };
+}
+
+function drawMap() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const isDay = currentThemeMode === 'day';
+    const gridColor = isDay ? '#fde68a' : '#111827';
+    const roadColor = isDay ? '#cbd5e1' : '#1f2937';
+    const shortcutColor = isDay ? '#d97706' : '#f59e0b';
+    const highlightPathColor = isDay ? '#2563eb' : '#38bdf8';
+    const nodeDefault = isDay ? '#f59e0b' : '#374151';
+    const nodeText = isDay ? '#78350f' : '#f9fafc';
+
+    // วาด Grid
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    for (let i = 0; i < canvas.width; i += 30) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
+    for (let i = 0; i < canvas.height; i += 30) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke(); }
+
+    // วาดเส้นทางทั้งหมดในระบบ (แยกเส้นทางหลัก กับ เส้นทางลัด)
+    graph.forEach(edge => {
+        const u = nodes[edge.from];
+        const v = nodes[edge.to];
+        if (!u || !v) return;
+
+        ctx.beginPath();
+        ctx.moveTo(u.x, u.y);
+        ctx.lineTo(v.x, v.y);
+
+        if (edge.shortcut) {
+            ctx.strokeStyle = shortcutColor;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]); // แสดงทางลัดเป็นเส้นประ
+        } else {
+            ctx.strokeStyle = roadColor;
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([]);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+    });
+
+    // วาดเส้นทางที่เลือก (วิ่งตามแนวเส้นจริง ไม่ลอยข้าม)
+    activeEdges.forEach(e => {
+        const u = nodes[e.from];
+        const v = nodes[e.to];
+
+        ctx.beginPath();
+        ctx.moveTo(u.x, u.y);
+        ctx.lineTo(v.x, v.y);
+        ctx.strokeStyle = highlightPathColor;
+        ctx.lineWidth = 6;
+        ctx.shadowColor = highlightPathColor;
+        ctx.shadowBlur = 10;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // วาดเส้นประซ้อนวิ่งตามทาง
+        ctx.beginPath();
+        ctx.moveTo(u.x, u.y);
+        ctx.lineTo(v.x, v.y);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 6]);
+        ctx.lineDashOffset = -dashOffset;
+        ctx.stroke();
+        ctx.setLineDash([]);
+    });
+
+    const startProv = document.getElementById('startInput').value.trim();
+    const endProv = document.getElementById('endInput').value.trim();
+
+    // วาดจุดหมุดจังหวัด
+    for (let key in nodes) {
+        const node = nodes[key];
+        const isInPath = activeVisitedNodes.includes(key);
+
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, (key === startProv || key === endProv) ? 8 : (isInPath ? 5 : 3.5), 0, Math.PI * 2);
+        ctx.fillStyle = key === startProv ? '#10b981' : (key === endProv ? '#ef4444' : (isInPath ? highlightPathColor : nodeDefault));
+        ctx.fill();
+
+        if (isInPath || key === startProv || key === endProv) {
+            ctx.fillStyle = nodeText;
+            ctx.font = 'bold 11px Kanit';
+            ctx.fillText(key, node.x - 12, node.y - 10);
+        }
+    }
+
+    // วาดพาหนะ
+    if (vehiclePosition) {
+        const vehicleIcon = document.getElementById('vehicleType').value;
+        ctx.font = '22px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(vehicleIcon, vehiclePosition.x, vehiclePosition.y);
+    }
+}
+
+function calculateRoute() {
+    if (isAnimating) return;
+
+    const startNode = document.getElementById('startInput').value.trim();
+    const endNode = document.getElementById('endInput').value.trim();
+    const optType = document.getElementById('optimizeType').value;
+
+    if (!startNode || !endNode || !nodes[startNode] || !nodes[endNode] || startNode === endNode) {
+        alert('กรุณาเลือกจังหวัดต้นทางและปลายทางให้ถูกต้องครับ');
+        return;
+    }
+
+    resetState();
+    const routeData = dijkstra(startNode, endNode, optType);
+    activePath = routeData.path;
+
+    if (activePath.length <= 1) {
+        document.getElementById('routeStatus').innerHTML = '<div class="placeholder-text" style="color: #ef4444;">❌ ไม่พบเส้นทางเชื่อมต่อระหว่างสองจังหวัดนี้</div>';
+        return;
+    }
+
+    isAnimating = true;
+    toggleButtons(true);
+
+    let totalDist = 0;
+    let totalCost = 0;
+    let totalHoursFloat = 0;
+    const vehicle = document.getElementById('vehicleType').value;
+    const vehicleSpeedFactor = (vehicle === '🛵') ? 0.85 : 1.0;
+
+    for (let edge of routeData.pathEdges) {
+        totalDist += edge.dist;
+        totalCost += edge.cost;
+        totalHoursFloat += edge.dist / (edge.speed * vehicleSpeedFactor);
+    }
+
+    if (vehicle === '🛵') totalCost = Math.round(totalCost * 0.4);
+
+    let hours = Math.floor(totalHoursFloat);
+    let mins = Math.round((totalHoursFloat - hours) * 60);
+
+    document.getElementById('valDist').innerText = `${totalDist} กม.`;
+    document.getElementById('valCost').innerText = `${totalCost.toLocaleString()} บาท`;
+    document.getElementById('valTime').innerText = `${hours} ชม. ${mins} นาที`;
+
+    animateSegment(0, routeData.pathEdges);
+}
+
+function animateSegment(index, edgesList) {
+    if (index >= edgesList.length) {
+        vehiclePosition = null;
+        isAnimating = false;
+        toggleButtons(false);
+        drawMap();
+
+        const optType = document.getElementById('optimizeType').value;
+        let optText = optType === 'shortcut' ? '🛣️ ทางลัด' : (optType === 'time' ? '⚡ เร็วที่สุด' : '💰 ประหยัดสุด');
+
+        let flowHtml = activePath.map((p, idx) => {
+            let className = 'step-item';
+            let icon = '📍';
+            if (idx === 0) { className += ' start'; icon = '🛫'; }
+            else if (idx === activePath.length - 1) { className += ' end'; icon = '🏁'; }
+            let arrow = (idx < activePath.length - 1) ? '<span style="color:#64748b;">➔</span>' : '';
+            return `<div class="${className}">${icon} ${p}</div> ${arrow}`;
+        }).join(' ');
+
+        document.getElementById('routeStatus').innerHTML = `
+            <div class="route-card-header">
+                <div><b>🎉 วาดเส้นทางเรียบร้อยแล้ว</b></div>
+                <div style="font-size:12px; font-weight:bold; color:#38bdf8;">${optText}</div>
+            </div>
+            <div class="route-flow-container">${flowHtml}</div>
+        `;
+        return;
+    }
+
+    const currentEdge = edgesList[index];
+    const uName = activePath[index];
+    const vName = activePath[index + 1];
+    const u = nodes[uName];
+    const v = nodes[vName];
+
+    if (!activeVisitedNodes.includes(uName)) activeVisitedNodes.push(uName);
+
+    let frames = 15;
+    let currentFrame = 0;
+
+    function step() {
+        currentFrame++;
+        dashOffset = (dashOffset + 1.5) % 12;
+        let progress = currentFrame / frames;
+
+        vehiclePosition = {
+            x: u.x + (v.x - u.x) * progress,
+            y: u.y + (v.y - u.y) * progress
+        };
+
+        drawMap();
+
+        if (currentFrame < frames) {
+            requestAnimationFrame(step);
+        } else {
+            activeEdges.push({ from: uName, to: vName });
+            if (!activeVisitedNodes.includes(vName)) activeVisitedNodes.push(vName);
+            animateSegment(index + 1, edgesList);
+        }
+    }
+
+    step();
+}
+
+function toggleButtons(disabled) {
+    document.querySelectorAll('.btn-action, .btn-swap').forEach(btn => btn.disabled = disabled);
+}
+
+function resetState() {
+    activePath = [];
+    activeEdges = [];
+    activeVisitedNodes = [];
+    vehiclePosition = null;
+}
+
+function resetMap() {
+    if (isAnimating) return;
+    resetState();
+    document.getElementById('startInput').value = '';
+    document.getElementById('endInput').value = '';
+    document.getElementById('valDist').innerText = '0 กม.';
+    document.getElementById('valCost').innerText = '0 บาท';
+    document.getElementById('valTime').innerText = '0 ชม. 0 นาที';
+    document.getElementById('routeStatus').innerHTML = `
+        <div class="placeholder-text">📌 เลือก <b>ต้นทาง, ปลายทาง, รูปแบบการเดินทาง</b> แล้วกดปุ่ม <b>"ค้นหาเส้นทาง"</b></div>
+    `;
+    drawMap();
+}
+
+setupSearchAutocomplete('startInput', 'startSuggestions');
+setupSearchAutocomplete('endInput', 'endSuggestions');
+updateTheme();
+</script>
+
+</body>
+</html>
